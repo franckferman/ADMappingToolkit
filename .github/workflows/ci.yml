@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [stable, dev]
+  pull_request:
+    branches: [stable]
+
+jobs:
+  lint-powershell:
+    name: PSScriptAnalyzer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Analyze scripts
+        shell: pwsh
+        run: |
+          $settings = './.github/PSScriptAnalyzerSettings.psd1'
+          $results = Invoke-ScriptAnalyzer -Path ./scripts -Recurse -Severity Warning,Error -Settings $settings
+          if ($results) {
+            $results | Format-Table -AutoSize
+            exit 1
+          }
+          Write-Host "[+] PSScriptAnalyzer: scripts/ clean."
+
+      - name: Analyze module
+        shell: pwsh
+        run: |
+          $settings = './.github/PSScriptAnalyzerSettings.psd1'
+          $results = Invoke-ScriptAnalyzer -Path ./ADMappingToolkit.psm1 -Severity Warning,Error -Settings $settings
+          if ($results) {
+            $results | Format-Table -AutoSize
+            exit 1
+          }
+          Write-Host "[+] PSScriptAnalyzer: ADMappingToolkit.psm1 clean."
+
+  lint-python:
+    name: Python syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: |
+          python3 -m py_compile tools/Invoke-PSEncoder.py
+          echo "[+] Python syntax OK."
+
+  verify-structure:
+    name: Verify structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files
+        run: |
+          required=(
+            "ADMappingToolkit.psm1"
+            "scripts/Check-All.ps1"
+            "scripts/Check-Servers.ps1"
+            "scripts/Check-Clients.ps1"
+            "tools/Invoke-PSEncoder.py"
+            "tools/Sign-Scripts.ps1"
+            "docs/index.html"
+            "docs/doc.html"
+          )
+          fail=0
+          for f in "${required[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "[!] Missing: $f"
+              fail=1
+            else
+              echo "[+] $f"
+            fi
+          done
+          exit $fail

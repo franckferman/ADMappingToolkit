@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADMappingToolkit - Documentation</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #060606;
+  --s1:      #0d0d0d;
+  --s2:      #111;
+  --s3:      #0a0a0a;
+  --border:  #1c1c1c;
+  --dim:     #252525;
+  --text:    #cccccc;
+  --muted:   #555;
+  --faint:   #1e1e1e;
+  --accent:  #c0392b;
+  --accent2: #e74c3c;
+  --green:   #27ae60;
+  --blue:    #569cd6;
+  --yellow:  #dcdcaa;
+  --orange:  #ce9178;
+  --teal:    #4ec9b0;
+  --mono:    'Courier New', Courier, monospace;
+  --sidebar: 220px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--mono); font-size: .82rem;
+  line-height: 1.65; overflow-x: hidden;
+}
+
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background: repeating-linear-gradient(to bottom,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px);
+  pointer-events: none; z-index: 100;
+}
+
+/* ---- layout ---- */
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar); flex-shrink: 0;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  background: var(--s3); border-right: 1px solid var(--border);
+  overflow-y: auto; overflow-x: hidden;
+  padding: 1.6rem 0 2rem;
+  z-index: 50;
+}
+
+.sidebar-logo {
+  padding: 0 1.2rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+.sidebar-logo a {
+  text-decoration: none; color: var(--text);
+  font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
+  display: flex; align-items: center; gap: .5rem;
+}
+.sidebar-logo a::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+}
+
+.nav-section {
+  padding: .5rem 1.2rem .25rem;
+  font-size: .55rem; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+.nav-link {
+  display: block; padding: .38rem 1.2rem;
+  font-size: .7rem; letter-spacing: .05em;
+  color: var(--muted); text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.nav-link:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-link.active { color: var(--text); border-left-color: var(--accent); background: rgba(192,57,43,.05); }
+
+.main {
+  margin-left: var(--sidebar);
+  flex: 1; padding: 3rem 3rem 5rem;
+  max-width: 900px;
+}
+
+/* ---- sections ---- */
+.section { margin-bottom: 4rem; }
+
+h1 {
+  font-size: clamp(1.1rem, 3vw, 1.8rem);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text); margin-bottom: .6rem;
+}
+h1 .sub {
+  display: block; font-size: .65rem; letter-spacing: .2em;
+  color: var(--muted); margin-top: .2rem; font-weight: normal;
+}
+
+h2 {
+  font-size: .95rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text); margin-bottom: 1rem; margin-top: 2.5rem;
+  padding-bottom: .4rem; border-bottom: 1px solid var(--border);
+}
+h2:first-child { margin-top: 0; }
+
+h3 {
+  font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent2); margin-bottom: .7rem; margin-top: 1.8rem;
+}
+
+p { color: var(--text); margin-bottom: .9rem; }
+p.muted { color: var(--muted); }
+
+/* ---- code ---- */
+code {
+  background: var(--faint); color: var(--teal);
+  padding: .1rem .35rem; border-radius: 2px;
+  font-family: var(--mono); font-size: .8rem;
+}
+
+pre {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1rem 1.2rem;
+  overflow-x: auto; margin-bottom: 1.2rem;
+  position: relative;
+}
+pre code {
+  background: none; color: var(--text);
+  padding: 0; font-size: .78rem; line-height: 1.6;
+}
+.pre-label {
+  position: absolute; top: .5rem; right: .8rem;
+  font-size: .55rem; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ps1  { color: var(--blue); }
+.flag { color: var(--yellow); }
+.str  { color: var(--orange); }
+.cmt  { color: #444; }
+.kw   { color: var(--blue); }
+.out  { color: var(--teal); }
+.dim  { color: var(--muted); }
+
+/* ---- table ---- */
+.tbl { width: 100%; border-collapse: collapse; margin-bottom: 1.2rem; font-size: .76rem; }
+.tbl th {
+  text-align: left; padding: .5rem .8rem;
+  border-bottom: 1px solid var(--border);
+  font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted);
+}
+.tbl td { padding: .45rem .8rem; border-bottom: 1px solid var(--faint); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl .col-flag { color: var(--yellow); white-space: nowrap; }
+.tbl .col-default { color: var(--orange); }
+.tbl .col-desc { color: var(--muted); }
+
+/* ---- badges ---- */
+.badge-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+.badge {
+  font-size: .58rem; letter-spacing: .12em; text-transform: uppercase;
+  padding: .2rem .6rem; border-radius: 2px; border: 1px solid;
+}
+.badge-ps { color: #569cd6; border-color: rgba(86,156,214,.3); background: rgba(86,156,214,.05); }
+.badge-ad { color: #27ae60; border-color: rgba(39,174,96,.3); background: rgba(39,174,96,.05); }
+.badge-net { color: #dcdcaa; border-color: rgba(220,220,170,.3); background: rgba(220,220,170,.05); }
+
+/* ---- callout ---- */
+.callout {
+  border-left: 3px solid var(--accent);
+  background: rgba(192,57,43,.04);
+  padding: .7rem 1rem; margin-bottom: 1.2rem;
+  font-size: .76rem; color: var(--muted);
+}
+.callout strong { color: var(--text); }
+
+/* ---- divider ---- */
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+/* ---- mobile ---- */
+@media (max-width: 860px) {
+  :root { --sidebar: 0px; }
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 2rem 1.2rem 4rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html">ADMappingToolkit</a>
+  </div>
+
+  <span class="nav-section">Getting Started</span>
+  <a class="nav-link" href="#overview">Overview</a>
+  <a class="nav-link" href="#installation">Installation</a>
+  <a class="nav-link" href="#quickstart">Quick Start</a>
+
+  <span class="nav-section">Scripts</span>
+  <a class="nav-link" href="#check-all">Check-All</a>
+  <a class="nav-link" href="#check-servers">Check-Servers</a>
+  <a class="nav-link" href="#check-clients">Check-Clients</a>
+
+  <span class="nav-section">Reference</span>
+  <a class="nav-link" href="#parameters">Parameters</a>
+  <a class="nav-link" href="#port-keywords">Port Keywords</a>
+  <a class="nav-link" href="#targets">Target Formats</a>
+  <a class="nav-link" href="#reports">Reports</a>
+
+  <span class="nav-section">Examples</span>
+  <a class="nav-link" href="#examples-recon">AD Recon</a>
+  <a class="nav-link" href="#examples-network">Network Scan</a>
+  <a class="nav-link" href="#examples-stealth">Stealth</a>
+  <a class="nav-link" href="#examples-export">Export</a>
+
+  <span class="nav-section">Use Cases</span>
+  <a class="nav-link" href="#use-cases">RSSI / Security</a>
+
+  <span class="nav-section">Security Context</span>
+  <a class="nav-link" href="#sec-unconstrained">Unconstrained Delegation</a>
+  <a class="nav-link" href="#sec-eos">End-of-Support OS</a>
+  <a class="nav-link" href="#sec-rdp">RDP Exposure</a>
+  <a class="nav-link" href="#sec-stealth">Stealth &amp; Detection</a>
+  <a class="nav-link" href="#sec-mitre">MITRE ATT&amp;CK</a>
+
+  <span class="nav-section">Tools</span>
+  <a class="nav-link" href="#tools-encoder">Invoke-PSEncoder</a>
+  <a class="nav-link" href="#tools-sign">Sign-Scripts</a>
+
+  <div style="margin-top:auto;padding:1.4rem 1.2rem 0;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:.5rem;margin-top:2rem">
+    <a href="https://github.com/franckferman/ADMappingToolkit/archive/refs/heads/stable.zip" target="_blank" rel="noopener" style="font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--faint);padding:.4rem .8rem;border-radius:3px;text-align:center;transition:color .15s,border-color .15s" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--faint)'">Download</a>
+    <a href="https://github.com/franckferman/ADMappingToolkit" target="_blank" rel="noopener" style="font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--faint);padding:.4rem .8rem;border-radius:3px;text-align:center;transition:color .15s,border-color .15s" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--faint)'">Source</a>
+    <a href="index.html" style="font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--faint);padding:.4rem .8rem;border-radius:3px;text-align:center;transition:color .15s,border-color .15s" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--faint)'">Site</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- OVERVIEW -->
+  <section class="section" id="overview">
+    <h1>ADMappingToolkit <span class="sub">Hybrid SI mapping — AD inventory + active network scan</span></h1>
+
+    <div class="badge-row">
+      <span class="badge badge-ps">PowerShell 5.1+</span>
+      <span class="badge badge-ad">ActiveDirectory Module</span>
+      <span class="badge badge-net">Network Scan</span>
+    </div>
+
+    <p>ADMappingToolkit is a hybrid SI mapping toolkit. Classic AD-based inventory only sees machines it already knows. In any real enterprise network, AD is structurally incomplete: unmanaged devices, IoT, printers, Linux servers, NAS, and shadow IT never register in AD. ADMappingToolkit closes this visibility gap by combining AD queries with active network probing in a single unified report.</p>
+
+    <p>Three runner scripts cover the three most common scopes: all machines, servers only, or clients only. Each script is a thin wrapper around the module functions and exposes the full parameter set directly from the command line.</p>
+
+    <h3>AD correlation chain</h3>
+    <p>When scanning a raw IP target, the tool does not just report "this IP responded". It runs a full correlation chain:</p>
+    <ol style="color:var(--muted);margin-bottom:1rem;padding-left:1.2rem;line-height:2.2">
+      <li>Reverse DNS lookup (<code>Resolve-DnsName -Type PTR</code>) to retrieve the FQDN</li>
+      <li>AD lookup by <code>DNSHostName</code> or <code>Name</code> to find a match</li>
+      <li>If found: entry enriched with OS, OU, LastLogon, and all AD metadata</li>
+      <li>If not found: a synthetic object is created — the device is flagged as non-AD</li>
+    </ol>
+    <p>A single subnet scan returns both your managed Windows fleet and every unmanaged device on the same network in one report.</p>
+
+    <h3>Architecture</h3>
+    <pre><code>ADMappingToolkit/
+  ADMappingToolkit.psm1       <span class="cmt"># Module — all functions</span>
+  scripts/
+    Check-All.ps1             <span class="cmt"># Wrapper: Get-MachineInventory (all OS)</span>
+    Check-Servers.ps1         <span class="cmt"># Wrapper: Get-ServerInventory (Server OS)</span>
+    Check-Clients.ps1         <span class="cmt"># Wrapper: Get-ClientInventory (Client OS)</span>
+  tools/
+    Invoke-PSEncoder.py       <span class="cmt"># Base64 UTF-16LE encoder for -EncodedCommand</span>
+    Sign-Scripts.ps1          <span class="cmt"># Authenticode signing with RFC 3161 timestamp</span></code></pre>
+
+    <p>The module exports three inventory functions. <code>Get-MachineInventory</code> queries all AD computers. <code>Get-ServerInventory</code> and <code>Get-ClientInventory</code> are thin wrappers that pre-filter by OS family before passing the target list to the shared inventory engine.</p>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- INSTALLATION -->
+  <section class="section" id="installation">
+    <h2>Installation</h2>
+
+    <h3>Requirements</h3>
+    <ul style="color:var(--muted);margin-bottom:1rem;padding-left:1.2rem;line-height:2">
+      <li>PowerShell 5.1 or PowerShell 7+</li>
+      <li>RSAT ActiveDirectory module (<code>Import-Module ActiveDirectory</code>)</li>
+      <li>Domain-joined machine or explicit <code>-Credential</code></li>
+    </ul>
+
+    <h3>Clone</h3>
+    <pre><code><span class="dim"># Clone the repo</span>
+git clone https://github.com/franckferman/ADMappingToolkit.git
+cd ADMappingToolkit
+
+<span class="dim"># Unblock if downloaded from the internet</span>
+Get-ChildItem -Recurse *.ps1,*.psm1 | Unblock-File</code></pre>
+
+    <h3>Import the module directly</h3>
+    <pre><code>Import-Module .\ADMappingToolkit.psm1 -Force</code></pre>
+
+    <p>The runner scripts import the module automatically from their parent directory. You do not need to import manually when using the scripts.</p>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- QUICK START -->
+  <section class="section" id="quickstart">
+    <h2>Quick Start</h2>
+
+    <pre><code><span class="dim"># 1. Discover all reachable machines in the domain</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-OnlyReachable</span> <span class="flag">-Stats</span>
+
+<span class="dim"># 2. Probe servers for SMB, RDP, WinRM</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-TcpCheck</span> <span class="flag">-Ports</span> <span class="str">445,3389,5985</span> <span class="flag">-OnlyReachable</span>
+
+<span class="dim"># 3. Flag end-of-support workstations</span>
+<span class="ps1">.\scripts\Check-Clients.ps1</span> <span class="flag">-CheckEOS</span> <span class="flag">-ShowOU</span> <span class="flag">-AutoCsv</span>
+
+<span class="dim"># 4. Export full inventory to CSV</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-OutCsv</span> <span class="str">inventory.csv</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- CHECK-ALL -->
+  <section class="section" id="check-all">
+    <h2>Check-All.ps1</h2>
+
+    <p>Wrapper for <code>Get-MachineInventory</code>. Queries all AD computer accounts regardless of OS. Use this for full-domain discovery.</p>
+
+    <pre><code><span class="ps1">.\scripts\Check-All.ps1</span> [parameters...]</code></pre>
+
+    <h3>Common invocations</h3>
+    <pre><code><span class="dim"># Reachable machines only, print stats</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-OnlyReachable</span> <span class="flag">-Stats</span>
+
+<span class="dim"># Top 20 port scan, turbo mode (PS7+)</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-TcpCheck</span> <span class="flag">-Ports</span> <span class="str">Top20</span> <span class="flag">-Turbo</span>
+
+<span class="dim"># Unconstrained delegation check</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-ADOnly</span> <span class="flag">-CheckUnconstrained</span> <span class="flag">-ShowOU</span>
+
+<span class="dim"># Inactive hosts (not seen in 90 days)</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-MinDaysInactive</span> <span class="str">90</span> <span class="flag">-ADOnly</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- CHECK-SERVERS -->
+  <section class="section" id="check-servers">
+    <h2>Check-Servers.ps1</h2>
+
+    <p>Wrapper for <code>Get-ServerInventory</code>. Pre-filters to AD computers with a Windows Server OS before scanning. Ideal for targeting domain controllers, file servers, and application servers.</p>
+
+    <pre><code><span class="ps1">.\scripts\Check-Servers.ps1</span> [parameters...]</code></pre>
+
+    <h3>Common invocations</h3>
+    <pre><code><span class="dim"># SMB + RDP + WinRM probe</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-TcpCheck</span> <span class="flag">-Ports</span> <span class="str">445,3389,5985</span> <span class="flag">-OnlyReachable</span>
+
+<span class="dim"># LDAP availability check</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-CheckLDAP</span> <span class="flag">-OnlyReachable</span>
+
+<span class="dim"># Check WinRM connectivity</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-CheckWinRM</span> <span class="flag">-OnlyReachable</span>
+
+<span class="dim"># EOS + unconstrained delegation</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-ADOnly</span> <span class="flag">-CheckEOS</span> <span class="flag">-CheckUnconstrained</span> <span class="flag">-ShowOU</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- CHECK-CLIENTS -->
+  <section class="section" id="check-clients">
+    <h2>Check-Clients.ps1</h2>
+
+    <p>Wrapper for <code>Get-ClientInventory</code>. Pre-filters to AD computers with a Windows client OS (Windows 10/11/7/XP etc.) before scanning.</p>
+
+    <pre><code><span class="ps1">.\scripts\Check-Clients.ps1</span> [parameters...]</code></pre>
+
+    <h3>Common invocations</h3>
+    <pre><code><span class="dim"># Flag end-of-support workstations</span>
+<span class="ps1">.\scripts\Check-Clients.ps1</span> <span class="flag">-CheckEOS</span> <span class="flag">-ShowOU</span> <span class="flag">-ADOnly</span>
+
+<span class="dim"># RDP exposure on clients</span>
+<span class="ps1">.\scripts\Check-Clients.ps1</span> <span class="flag">-Report</span> <span class="str">OpenRDP</span>
+
+<span class="dim"># Inactive clients (no logon in 60 days)</span>
+<span class="ps1">.\scripts\Check-Clients.ps1</span> <span class="flag">-MinDaysInactive</span> <span class="str">60</span> <span class="flag">-ADOnly</span>
+
+<span class="dim"># Export all clients to CSV</span>
+<span class="ps1">.\scripts\Check-Clients.ps1</span> <span class="flag">-AutoCsv</span> <span class="flag">-ADOnly</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- PARAMETERS -->
+  <section class="section" id="parameters">
+    <h2>Parameters Reference</h2>
+    <p class="muted">All three scripts accept the same parameter set.</p>
+
+    <h3>AD Query</h3>
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">-SearchBase</td><td class="col-default">""</td><td class="col-desc">LDAP OU/DN to scope the AD query. Empty = entire domain.</td></tr>
+        <tr><td class="col-flag">-IncludeDisabled</td><td class="col-default">off</td><td class="col-desc">Include disabled computer accounts in results.</td></tr>
+        <tr><td class="col-flag">-OnlyDisabled</td><td class="col-default">off</td><td class="col-desc">Return only disabled computer accounts.</td></tr>
+        <tr><td class="col-flag">-MinDaysInactive</td><td class="col-default">0</td><td class="col-desc">Filter to computers inactive for at least N days (0 = no filter).</td></tr>
+        <tr><td class="col-flag">-Targets</td><td class="col-default">—</td><td class="col-desc">Override AD query: supply hostnames, IPs, CIDR, ranges, or wildcards.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Network Probing</h3>
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">-NoIcmp</td><td class="col-default">off</td><td class="col-desc">Skip ICMP ping. Use TCP check or AD-only mode instead.</td></tr>
+        <tr><td class="col-flag">-PingCount</td><td class="col-default">1</td><td class="col-desc">Number of ICMP echo requests per host.</td></tr>
+        <tr><td class="col-flag">-TimeoutMs</td><td class="col-default">1200</td><td class="col-desc">TCP connect timeout in milliseconds.</td></tr>
+        <tr><td class="col-flag">-TcpCheck</td><td class="col-default">off</td><td class="col-desc">Probe TCP ports defined by -Ports.</td></tr>
+        <tr><td class="col-flag">-Ports</td><td class="col-default">445,3389,5985</td><td class="col-desc">Comma-separated ports or Top5/Top10/Top20/Top50/Top100 keyword.</td></tr>
+        <tr><td class="col-flag">-CheckLDAP</td><td class="col-default">off</td><td class="col-desc">Probe TCP 389 and 636 (LDAP / LDAPS).</td></tr>
+        <tr><td class="col-flag">-CheckWinRM</td><td class="col-default">off</td><td class="col-desc">Test WinRM connectivity (Test-WSMan).</td></tr>
+        <tr><td class="col-flag">-CheckPSSession</td><td class="col-default">off</td><td class="col-desc">Attempt New-PSSession to verify remote PS access.</td></tr>
+        <tr><td class="col-flag">-ResolveDns</td><td class="col-default">off</td><td class="col-desc">Reverse-resolve IP targets to hostnames for AD correlation.</td></tr>
+        <tr><td class="col-flag">-ADOnly</td><td class="col-default">off</td><td class="col-desc">Skip all network probes, return AD attributes only.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Filtering</h3>
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">-OnlyReachable</td><td class="col-default">off</td><td class="col-desc">Return only hosts that responded to ICMP or TCP.</td></tr>
+        <tr><td class="col-flag">-OnlyUnreachable</td><td class="col-default">off</td><td class="col-desc">Return only hosts that did NOT respond.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Performance</h3>
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">-Turbo</td><td class="col-default">off</td><td class="col-desc">Enable ForEach-Object -Parallel scanning. Requires PowerShell 7+. Mutually exclusive with -Stealth.</td></tr>
+        <tr><td class="col-flag">-Threads</td><td class="col-default">50</td><td class="col-desc">Thread count for Turbo mode (capped at 1000).</td></tr>
+        <tr><td class="col-flag">-Stealth</td><td class="col-default">off</td><td class="col-desc">Sequential scan with random delay between hosts. Disables Turbo automatically.</td></tr>
+        <tr><td class="col-flag">-StealthDelay</td><td class="col-default">2,10</td><td class="col-desc">Min/max random delay in seconds for Stealth mode. E.g. -StealthDelay 5,20.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>AD Enrichment</h3>
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">-CheckUnconstrained</td><td class="col-default">off</td><td class="col-desc">Retrieve TrustedForDelegation attribute. Flag machines with unconstrained delegation.</td></tr>
+        <tr><td class="col-flag">-CheckEOS</td><td class="col-default">off</td><td class="col-desc">Flag end-of-support OS (Windows XP, 7, 2003, 2008, etc.).</td></tr>
+        <tr><td class="col-flag">-ShowOU</td><td class="col-default">off</td><td class="col-desc">Include OU path in output.</td></tr>
+        <tr><td class="col-flag">-ShowDescription</td><td class="col-default">off</td><td class="col-desc">Include AD computer description field.</td></tr>
+        <tr><td class="col-flag">-ShowEnabled</td><td class="col-default">off</td><td class="col-desc">Include Enabled column.</td></tr>
+        <tr><td class="col-flag">-Credential</td><td class="col-default">—</td><td class="col-desc">PSCredential for AD queries and WinRM checks.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Output</h3>
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">-Properties</td><td class="col-default">*</td><td class="col-desc">Select specific columns from the result set.</td></tr>
+        <tr><td class="col-flag">-RawOutput</td><td class="col-default">off</td><td class="col-desc">Return raw PSObject array (pipeline-friendly). Suppresses table formatting.</td></tr>
+        <tr><td class="col-flag">-Stats</td><td class="col-default">off</td><td class="col-desc">Print summary line: total / reachable / unreachable / reachability %.</td></tr>
+        <tr><td class="col-flag">-AutoCsv</td><td class="col-default">off</td><td class="col-desc">Auto-generate timestamped CSV filename and export.</td></tr>
+        <tr><td class="col-flag">-OutCsv</td><td class="col-default">""</td><td class="col-desc">Export results to specified CSV path.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Reports</h3>
+    <table class="tbl">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">-Report</td><td class="col-default">—</td><td class="col-desc">Named report: <code>Inactive</code> or <code>OpenRDP</code>.</td></tr>
+        <tr><td class="col-flag">-ReportDays</td><td class="col-default">30</td><td class="col-desc">Lookback window in days for the Inactive report.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- PORT KEYWORDS -->
+  <section class="section" id="port-keywords">
+    <h2>Port Keywords</h2>
+    <p>Pass a keyword to <code>-Ports</code> instead of a manual list. Setting a Top keyword automatically enables <code>-TcpCheck</code>.</p>
+
+    <table class="tbl">
+      <thead><tr><th>Keyword</th><th>Ports</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">Top5</td><td class="col-desc">21, 22, 80, 443, 3389</td></tr>
+        <tr><td class="col-flag">Top10</td><td class="col-desc">Top5 + 25, 53, 135, 139, 445</td></tr>
+        <tr><td class="col-flag">Top20</td><td class="col-desc">Top10 + 110, 143, 389, 1433, 3306, 5900, 5985, 8080, 8443</td></tr>
+        <tr><td class="col-flag">Top50</td><td class="col-desc">Top20 + 23, 69, 88, 111, 119, 161, 162, 179, 199, &hellip;</td></tr>
+        <tr><td class="col-flag">Top100</td><td class="col-desc">Top50 + 1025, 1194, 1521, 1723, 2000, 2049, 4444, 5432, &hellip;</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- TARGET FORMATS -->
+  <section class="section" id="targets">
+    <h2>Target Formats</h2>
+    <p>The <code>-Targets</code> parameter bypasses the AD query and accepts mixed input:</p>
+
+    <table class="tbl">
+      <thead><tr><th>Format</th><th>Example</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">Hostname / AD name</td><td class="col-default">DC01</td><td class="col-desc">Queried directly in AD by name.</td></tr>
+        <tr><td class="col-flag">Wildcard</td><td class="col-default">SRV-*</td><td class="col-desc">AD filter: Name -like 'SRV-*'.</td></tr>
+        <tr><td class="col-flag">Single IP</td><td class="col-default">192.168.1.10</td><td class="col-desc">Probed directly; optional PTR reverse lookup.</td></tr>
+        <tr><td class="col-flag">CIDR</td><td class="col-default">192.168.1.0/24</td><td class="col-desc">All host IPs in range (capped at 65536).</td></tr>
+        <tr><td class="col-flag">IP range</td><td class="col-default">192.168.1.1-50</td><td class="col-desc">Short range: resolves to .1 through .50.</td></tr>
+        <tr><td class="col-flag">IP range (full)</td><td class="col-default">10.0.0.1-10.0.0.100</td><td class="col-desc">Full range between two IPs.</td></tr>
+      </tbody>
+    </table>
+
+    <pre><code><span class="dim"># Mixed: wildcard + CIDR</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-Targets</span> <span class="str">SRV-*</span>, <span class="str">192.168.10.0/24</span> <span class="flag">-TcpCheck</span> <span class="flag">-Ports</span> <span class="str">445,3389</span>
+
+<span class="dim"># IP range with DNS reverse lookup</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-Targets</span> <span class="str">10.0.0.1-50</span> <span class="flag">-ResolveDns</span> <span class="flag">-TcpCheck</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- REPORTS -->
+  <section class="section" id="reports">
+    <h2>Reports</h2>
+
+    <h3>Inactive</h3>
+    <p>Returns machines whose last logon is older than <code>-ReportDays</code> days (default 30).</p>
+    <pre><code><span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-Report</span> <span class="str">Inactive</span> <span class="flag">-ReportDays</span> <span class="str">90</span> <span class="flag">-ADOnly</span></code></pre>
+
+    <h3>OpenRDP</h3>
+    <p>Returns machines with TCP 3389 open. Automatically enables <code>-TcpCheck</code> and adds port 3389 to the probe list if missing.</p>
+    <pre><code><span class="ps1">.\scripts\Check-Clients.ps1</span> <span class="flag">-Report</span> <span class="str">OpenRDP</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-Report</span> <span class="str">OpenRDP</span> <span class="flag">-OnlyReachable</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- EXAMPLES: RECON -->
+  <section class="section" id="examples-recon">
+    <h2>AD Recon Examples</h2>
+
+    <pre><code><span class="dim"># Full domain inventory, AD attributes only</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-ADOnly</span> <span class="flag">-ShowOU</span> <span class="flag">-ShowDescription</span> <span class="flag">-ShowEnabled</span>
+
+<span class="dim"># Find computers with unconstrained delegation</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-ADOnly</span> <span class="flag">-CheckUnconstrained</span> <span class="flag">-ShowOU</span>
+
+<span class="dim"># Scope to a specific OU</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-SearchBase</span> <span class="str">"OU=Servers,DC=corp,DC=local"</span> <span class="flag">-ADOnly</span>
+
+<span class="dim"># Hosts inactive for 30+ days, export CSV</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-Report</span> <span class="str">Inactive</span> <span class="flag">-ReportDays</span> <span class="str">30</span> <span class="flag">-ADOnly</span> <span class="flag">-AutoCsv</span>
+
+<span class="dim"># Use alternate credentials</span>
+<span class="ps1">$cred</span> = Get-Credential
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-ADOnly</span> <span class="flag">-Credential</span> <span class="ps1">$cred</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- EXAMPLES: NETWORK -->
+  <section class="section" id="examples-network">
+    <h2>Network Scan Examples</h2>
+
+    <pre><code><span class="dim"># Ping sweep + TCP Top20</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-TcpCheck</span> <span class="flag">-Ports</span> <span class="str">Top20</span> <span class="flag">-OnlyReachable</span> <span class="flag">-Stats</span>
+
+<span class="dim"># LDAP availability on all servers</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-CheckLDAP</span> <span class="flag">-OnlyReachable</span>
+
+<span class="dim"># WinRM + PSSession check</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-CheckWinRM</span> <span class="flag">-CheckPSSession</span> <span class="flag">-OnlyReachable</span>
+
+<span class="dim"># Pure IP range scan (no AD)</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-Targets</span> <span class="str">192.168.1.0/24</span> <span class="flag">-TcpCheck</span> <span class="flag">-Ports</span> <span class="str">445,3389</span> <span class="flag">-Turbo</span>
+
+<span class="dim"># RDP exposure report across all clients</span>
+<span class="ps1">.\scripts\Check-Clients.ps1</span> <span class="flag">-Report</span> <span class="str">OpenRDP</span> <span class="flag">-Stats</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- EXAMPLES: STEALTH -->
+  <section class="section" id="examples-stealth">
+    <h2>Stealth Examples</h2>
+
+    <div class="callout">
+      <strong>Note:</strong> -Stealth disables Turbo automatically. Sequential probes with random delay reduce detection surface at the cost of scan speed.
+    </div>
+
+    <pre><code><span class="dim"># Slow sweep, 5-15 s random delay between hosts</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-Stealth</span> <span class="flag">-StealthDelay</span> <span class="str">5,15</span> <span class="flag">-OnlyReachable</span>
+
+<span class="dim"># Stealth + no ICMP (TCP-only, even less noise)</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-Stealth</span> <span class="flag">-NoIcmp</span> <span class="flag">-TcpCheck</span> <span class="flag">-Ports</span> <span class="str">445</span>
+
+<span class="dim"># Stealth on a specific target range</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-Targets</span> <span class="str">SRV-*</span> <span class="flag">-Stealth</span> <span class="flag">-StealthDelay</span> <span class="str">10,30</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- EXAMPLES: EXPORT -->
+  <section class="section" id="examples-export">
+    <h2>Export Examples</h2>
+
+    <pre><code><span class="dim"># Auto-generate timestamped CSV</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-AutoCsv</span>
+
+<span class="dim"># Explicit output path</span>
+<span class="ps1">.\scripts\Check-Servers.ps1</span> <span class="flag">-OutCsv</span> <span class="str">C:\Audit\servers.csv</span> <span class="flag">-TcpCheck</span> <span class="flag">-Ports</span> <span class="str">445,3389,5985</span>
+
+<span class="dim"># Select specific columns</span>
+<span class="ps1">.\scripts\Check-All.ps1</span> <span class="flag">-ADOnly</span> <span class="flag">-Properties</span> <span class="str">Name,OS,LastLogon,OU</span> <span class="flag">-OutCsv</span> <span class="str">names.csv</span>
+
+<span class="dim"># Pipeline: filter and export in PS</span>
+<span class="ps1">$r</span> = .<span class="ps1">\scripts\Check-All.ps1</span> <span class="flag">-RawOutput</span> <span class="flag">-TcpCheck</span> <span class="flag">-Ports</span> <span class="str">3389</span>
+<span class="ps1">$r</span> | Where-Object { <span class="ps1">$_</span>.TCP_3389 } | Export-Csv rdp-exposed.csv <span class="flag">-NoTypeInformation</span></code></pre>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- USE CASES -->
+  <section class="section" id="use-cases">
+    <h2>Use Cases</h2>
+
+    <h3>For security teams / RSSI</h3>
+    <table class="tbl">
+      <thead><tr><th>Need</th><th>How</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">How many machines are on the network?</td><td class="col-desc"><code>-Targets 10.0.0.0/24 -ResolveDns -Turbo</code></td></tr>
+        <tr><td class="col-flag">Do we have end-of-support OS?</td><td class="col-desc"><code>-CheckEOS</code> flags XP, Vista, 7, 2003, 2008, 2012</td></tr>
+        <tr><td class="col-flag">Which servers have RDP exposed?</td><td class="col-desc"><code>-Report OpenRDP</code></td></tr>
+        <tr><td class="col-flag">Ghost machines inactive for 90+ days?</td><td class="col-desc"><code>-MinDaysInactive 90 -ADOnly</code></td></tr>
+        <tr><td class="col-flag">Can we remotely administer a host?</td><td class="col-desc"><code>-CheckWinRM -CheckPSSession</code></td></tr>
+        <tr><td class="col-flag">Kerberos unconstrained delegation risk?</td><td class="col-desc"><code>-CheckUnconstrained</code></td></tr>
+        <tr><td class="col-flag">ISO 27001 / ANSSI asset inventory?</td><td class="col-desc">Full subnet scan + <code>-AutoCsv</code> for timestamped evidence</td></tr>
+        <tr><td class="col-flag">Shadow IT / unmanaged devices?</td><td class="col-desc">Non-AD objects returned as synthetic entries in same report</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Real-world results</h3>
+    <p class="muted">Scan of a <code>/24</code> subnet (254 hosts) in a production environment:</p>
+    <table class="tbl">
+      <thead><tr><th>Category</th><th>Count</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">Total responding hosts</td><td class="col-default">126</td><td class="col-desc">Out of 254 scanned</td></tr>
+        <tr><td class="col-flag">Windows machines (AD-matched)</td><td class="col-default">~50</td><td class="col-desc">Workstations and servers enriched with OS, OU, LastLogon</td></tr>
+        <tr><td class="col-flag">Non-AD devices</td><td class="col-default">~76</td><td class="col-desc">Printers, Raspberry Pi, NAS, Linux servers, IoT, appliances, smartphones</td></tr>
+        <tr><td class="col-flag">EOS servers detected</td><td class="col-default">2</td><td class="col-desc">Windows Server 2012 R2, Windows Server 2008 R2</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">In one command: a complete 360-degree view of the network — managed and unmanaged alike.</p>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- SECURITY CONTEXT -->
+  <section class="section" id="sec-unconstrained">
+    <h2>Security Context</h2>
+
+    <h3 id="sec-unconstrained">Unconstrained Kerberos Delegation (<code>-CheckUnconstrained</code>)</h3>
+    <p>Unconstrained delegation (<code>TrustedForDelegation = True</code>) is a Kerberos configuration that allows a service to impersonate any authenticated user to any other service in the domain. When a user authenticates to a host configured with unconstrained delegation, the domain controller embeds a full copy of the user's TGT (Ticket Granting Ticket) in the service ticket. The receiving host can then use that TGT to request service tickets on behalf of the user — without restriction.</p>
+    <p>Attack path: if an attacker compromises a host with unconstrained delegation and forces a privileged account (e.g., a Domain Controller computer account) to authenticate to it — via printer bug, PetitPotam, or coercion — the attacker captures a TGT for that account. A DC TGT enables a <strong>DCSync</strong> attack and full domain compromise.</p>
+    <div class="callout">
+      <strong>Detection:</strong> <code>-CheckUnconstrained</code> queries <code>TrustedForDelegation</code> from AD. Any non-DC computer with this flag set is a high-risk finding. Domain Controllers legitimately carry this attribute — filter them out. Remediation: switch to constrained delegation (<code>msDS-AllowedToDelegateTo</code>) or resource-based constrained delegation (RBCD).
+    </div>
+
+    <h3 id="sec-eos">End-of-Support Operating Systems (<code>-CheckEOS</code>)</h3>
+    <p>Microsoft end-of-support (EOS) dates mark the point after which no security patches are issued for a product. EOS systems accumulate unpatched CVEs indefinitely. The vulnerability surface grows with every new public disclosure while the system remains permanently exposed.</p>
+
+    <table class="tbl">
+      <thead><tr><th>OS</th><th>End of Support</th><th>Known CVE exposure</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">Windows XP</td><td class="col-default">April 2014</td><td class="col-desc">MS17-010 (EternalBlue), MS08-067, dozens of unpatched RCEs</td></tr>
+        <tr><td class="col-flag">Windows Vista</td><td class="col-default">April 2017</td><td class="col-desc">EternalBlue, EternalRomance, multiple privilege escalations</td></tr>
+        <tr><td class="col-flag">Windows 7</td><td class="col-default">January 2020</td><td class="col-desc">EternalBlue, PrintNightmare (partial), BlueKeep (CVE-2019-0708)</td></tr>
+        <tr><td class="col-flag">Windows Server 2003</td><td class="col-default">July 2015</td><td class="col-desc">MS17-010, MS08-067, multiple unpatched RPC and SMB RCEs</td></tr>
+        <tr><td class="col-flag">Windows Server 2008 (R2)</td><td class="col-default">January 2020</td><td class="col-desc">EternalBlue, PrintNightmare, Zerologon (CVE-2020-1472)</td></tr>
+        <tr><td class="col-flag">Windows Server 2012 (R2)</td><td class="col-default">October 2023</td><td class="col-desc">Growing unpatched CVE backlog post-EOL</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      EOS machines are often high-value targets for initial access and lateral movement precisely because exploitation is trivial and reliable — the vulnerability is permanent and public. ISO 27001 and ANSSI guidelines both require tracking and remediating EOS systems.
+    </div>
+
+    <h3 id="sec-rdp">RDP Exposure (<code>-Report OpenRDP</code>)</h3>
+    <p>TCP 3389 (Remote Desktop Protocol) exposed on workstations and servers is one of the most targeted attack surfaces in enterprise environments. RDP brute-force, credential stuffing, and unauthenticated pre-auth vulnerabilities (BlueKeep, CVE-2019-0708; DejaBlue, CVE-2019-1181/1182) have driven widespread ransomware deployments.</p>
+    <p>The <code>OpenRDP</code> report identifies all hosts with TCP 3389 open and reachable, regardless of whether they are in AD. This includes workstations with RDP inadvertently enabled, servers with RDP exposed to internal segments, and legacy hosts.</p>
+    <div class="callout">
+      <strong>Remediation priorities:</strong> restrict RDP access via firewall rules or Windows Firewall GPO, enforce NLA (Network Level Authentication), disable RDP on hosts that do not require it, and audit all machines with RDP open against an authorized list.
+    </div>
+
+    <h3 id="sec-stealth">Stealth Mode and Detection Evasion (<code>-Stealth</code>)</h3>
+    <p>Standard sequential network scanning generates predictable, high-volume traffic patterns. ICMP sweeps produce a burst of echo requests from a single source IP to sequential destinations — a trivial signature for IDS, SIEM correlation rules, and NDR (Network Detection and Response) products.</p>
+    <p>Stealth mode applies two mitigations:</p>
+    <ul style="color:var(--muted);margin-bottom:1rem;padding-left:1.2rem;line-height:2.2">
+      <li><strong>Random scan order</strong> (<code>Sort-Object { Get-Random }</code>): avoids the sequential sweep signature that IDS/SIEM rules commonly alert on</li>
+      <li><strong>Random inter-host delay</strong> (<code>-StealthDelay</code>): reduces packets-per-second rate, staying below typical threshold-based alerting</li>
+    </ul>
+    <p>Turbo mode (parallel scanning) is intentionally incompatible with Stealth — the two objectives are irreconcilable. OPSEC takes priority: if both are set, Turbo is disabled with an explicit warning.</p>
+
+    <h3 id="sec-mitre">MITRE ATT&CK Mapping</h3>
+    <table class="tbl">
+      <thead><tr><th>Technique</th><th>ID</th><th>ADMappingToolkit feature</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">Remote System Discovery</td><td class="col-default">T1018</td><td class="col-desc">AD enumeration, -Targets subnet/range scan</td></tr>
+        <tr><td class="col-flag">Network Service Scanning</td><td class="col-default">T1046</td><td class="col-desc">-TcpCheck, -CheckLDAP, -CheckWinRM, -CheckPSSession</td></tr>
+        <tr><td class="col-flag">System Network Configuration Discovery</td><td class="col-default">T1016</td><td class="col-desc">-ResolveDns, IPv4Address, DNSHostName enumeration</td></tr>
+        <tr><td class="col-flag">Account Discovery: Domain Account</td><td class="col-default">T1087.002</td><td class="col-desc">AD computer account enumeration via Get-ADComputer</td></tr>
+        <tr><td class="col-flag">Domain Trust Discovery</td><td class="col-default">T1482</td><td class="col-desc">-CheckUnconstrained (TrustedForDelegation)</td></tr>
+        <tr><td class="col-flag">Steal or Forge Kerberos Tickets</td><td class="col-default">T1558</td><td class="col-desc">Unconstrained delegation detection context</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- TOOLS: ENCODER -->
+  <section class="section" id="tools-encoder">
+    <h2>Invoke-PSEncoder.py</h2>
+
+    <p>Generates PowerShell <code>-EncodedCommand</code> oneliners from a PS1 file or a raw string. The encoded command is Base64 UTF-16LE, which bypasses <code>Restricted</code> and <code>AllSigned</code> execution policies because PowerShell treats it as an in-memory string, not a file read from disk.</p>
+
+    <pre><code><span class="dim"># Encode a script file</span>
+python3 tools/Invoke-PSEncoder.py scripts/Check-All.ps1
+
+<span class="dim"># Encode a raw command string</span>
+python3 tools/Invoke-PSEncoder.py -c ".\scripts\Check-All.ps1 -OnlyReachable -Stats"
+
+<span class="dim"># Add flags</span>
+python3 tools/Invoke-PSEncoder.py scripts/Check-All.ps1 --hidden --bypass
+
+<span class="dim"># Quiet mode (oneliner only, no decoration)</span>
+python3 tools/Invoke-PSEncoder.py -q -c ".\scripts\Check-All.ps1 -TcpCheck -Ports Top20"
+
+<span class="dim"># Copy to clipboard on Linux</span>
+python3 tools/Invoke-PSEncoder.py scripts/Check-All.ps1 | xclip -selection clipboard</code></pre>
+
+    <table class="tbl">
+      <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">file</td><td class="col-desc">Path to a PS1 file to encode.</td></tr>
+        <tr><td class="col-flag">-c / --command</td><td class="col-desc">Inline PowerShell command string to encode.</td></tr>
+        <tr><td class="col-flag">--hidden</td><td class="col-desc">Append -WindowStyle Hidden.</td></tr>
+        <tr><td class="col-flag">--bypass</td><td class="col-desc">Append -ExecutionPolicy Bypass.</td></tr>
+        <tr><td class="col-flag">--32</td><td class="col-desc">Use 32-bit PowerShell (SysWOW64).</td></tr>
+        <tr><td class="col-flag">--noexit</td><td class="col-desc">Append -NoExit.</td></tr>
+        <tr><td class="col-flag">-q / --quiet</td><td class="col-desc">Output only the oneliner.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- TOOLS: SIGN -->
+  <section class="section" id="tools-sign">
+    <h2>Sign-Scripts.ps1</h2>
+
+    <p>Signs all scripts in <code>scripts/</code> and <code>ADMappingToolkit.psm1</code> with Authenticode + RFC 3161 timestamp. The countersignature keeps signatures valid after certificate expiry.</p>
+
+    <p>Authenticode signing reduces detection surface: signed scripts bypass <code>AllSigned</code> execution policy without <code>-ExecutionPolicy Bypass</code>, and a valid signature lowers static heuristic scores in EDRs and AV engines that weigh unsigned scripts more aggressively.</p>
+
+    <pre><code><span class="dim"># Auto-generate temporary self-signed cert, sign, then remove cert</span>
+<span class="ps1">.\tools\Sign-Scripts.ps1</span>
+
+<span class="dim"># Use an existing cert by thumbprint</span>
+<span class="ps1">.\tools\Sign-Scripts.ps1</span> <span class="flag">-CertThumbprint</span> <span class="str">"AB12CD..."</span>
+
+<span class="dim"># Use a different timestamp server</span>
+<span class="ps1">.\tools\Sign-Scripts.ps1</span> <span class="flag">-TimestampServer</span> <span class="str">"http://timestamp.sectigo.com"</span></code></pre>
+
+    <h3>Cert type comparison</h3>
+    <table class="tbl">
+      <thead><tr><th>Cert type</th><th>Execution policy</th><th>SmartScreen</th><th>EDR static score</th></tr></thead>
+      <tbody>
+        <tr><td class="col-flag">None</td><td class="col-desc">Requires -ExecutionPolicy Bypass</td><td class="col-desc">Flagged</td><td class="col-desc">Higher risk weight</td></tr>
+        <tr><td class="col-flag">Self-signed</td><td class="col-desc">Passes AllSigned if cert is trusted locally</td><td class="col-desc">Still flagged</td><td class="col-desc">Slight improvement</td></tr>
+        <tr><td class="col-flag">OV code-signing</td><td class="col-desc">Passes AllSigned</td><td class="col-desc">Reduced warnings</td><td class="col-desc">Lower risk weight</td></tr>
+        <tr><td class="col-flag">EV code-signing</td><td class="col-desc">Passes AllSigned</td><td class="col-desc">Instant reputation</td><td class="col-desc">Best reduction</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      For meaningful evasion improvement, use an <strong>OV or EV certificate</strong> (DigiCert, Sectigo, GlobalSign). EV certs provide instant SmartScreen reputation and the strongest reduction in static detection. Self-signed certs only help with execution policy enforcement, not publisher trust.
+    </div>
+  </section>
+
+</main>
+</div>
+
+<script>
+// Scroll-spy
+const links = document.querySelectorAll('.nav-link');
+const sections = Array.from(document.querySelectorAll('section[id]'));
+
+function updateActive() {
+  const scrollY = window.scrollY + 120;
+  let cur = sections[0];
+  for (const s of sections) {
+    if (s.offsetTop <= scrollY) cur = s;
+  }
+  links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur.id));
+}
+
+window.addEventListener('scroll', updateActive, { passive: true });
+updateActive();
+</script>
+</body>
+</html>
